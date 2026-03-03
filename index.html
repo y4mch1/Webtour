@@ -21,30 +21,98 @@
     </div>
 
     <div id="admin-panel">
-        <h4>Scene Editor</h4>     
-        <label>Target Scene</label>
-        <select id="targetSceneSelect"></select>
-        <label>Icon Node</label>
-        <select id="iconSelect">
-            <option value="drone">Drone</option>
-            <option value="star">Star</option>
-        </select>
-        <button id="btn-confirm" class="admin-btn" onclick="confirmAddNode()">Add Node</button>
-        <label>Polygon Color</label>
-        <input type="color" id="polygonColor" value="#ff4d4d">
-        <button id="btn-polygon-mode" class="admin-btn" onclick="togglePolygonMode()">Polygon Mode: OFF</button>
-        <div class="polygon-action-group">
-            <button id="btn-polygon-save" class="admin-btn" onclick="savePolygonDraft()" disabled>Save Polygon</button>
-            <button id="btn-polygon-cancel" class="admin-btn" onclick="cancelPolygonDraft()" disabled>Cancel</button>
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="marker" onclick="switchAdminTab('marker')">Marker</button>
+            <button class="admin-tab" data-tab="sign" onclick="switchAdminTab('sign')">Papan Sign</button>
         </div>
-        <button id="btn-delete-mode" class="admin-btn" onclick="toggleDeleteMode()">Delete Mode: OFF</button>
-        <a href="#" id="btn-reset" onclick="resetDatabase()">Reset to Default</a>
+
+        <div id="tab-marker" class="admin-tab-panel active">
+            <h4>Marker & Polygon</h4>
+            <label>Target Scene</label>
+            <select id="targetSceneSelect"></select>
+            <label>Icon Node</label>
+            <select id="iconSelect">
+                <option value="drone">Drone</option>
+                <option value="star">Star</option>
+            </select>
+            <button id="btn-confirm" class="admin-btn" onclick="confirmAddNode()">Add Node</button>
+            <label>Polygon Color</label>
+            <input type="color" id="polygonColor" value="#ff4d4d">
+            <button id="btn-polygon-mode" class="admin-btn" onclick="togglePolygonMode()">Polygon Mode: OFF</button>
+            <div class="polygon-action-group">
+                <button id="btn-polygon-save" class="admin-btn" onclick="savePolygonDraft()" disabled>Save Polygon</button>
+                <button id="btn-polygon-cancel" class="admin-btn" onclick="cancelPolygonDraft()" disabled>Cancel</button>
+            </div>
+        </div>
+
+        <div id="tab-sign" class="admin-tab-panel">
+            <h4>Papan Sign</h4>
+            <div class="sign-grid">
+                <div class="sign-row">
+                    <div class="sign-field">
+                        <label>Title</label>
+                        <input type="text" id="signTitle" placeholder="Nama proyek">
+                    </div>
+                    <div class="sign-color">
+                        <label>Title Color</label>
+                        <input type="color" id="signTitleColor" value="#1b263b">
+                    </div>
+                </div>
+                <div class="sign-row">
+                    <div class="sign-field">
+                        <label>Alamat</label>
+                        <input type="text" id="signAddress" placeholder="Alamat lengkap">
+                    </div>
+                    <div class="sign-color">
+                        <label>Alamat Color</label>
+                        <input type="color" id="signAddressColor" value="#f8f9fa">
+                    </div>
+                </div>
+                <div class="sign-row">
+                    <div class="sign-field">
+                        <label>Luas Tanah</label>
+                        <input type="text" id="signArea" placeholder="Contoh: 1200 m2">
+                    </div>
+                    <div class="sign-color">
+                        <label>Luas Color</label>
+                        <input type="color" id="signAreaColor" value="#ffe066">
+                    </div>
+                </div>
+                <div class="sign-row single">
+                    <div class="sign-field">
+                        <label>Image URL</label>
+                        <input type="url" id="signImageUrl" placeholder="https://...">
+                    </div>
+                </div>
+            </div>
+            <p class="sign-hint">Arahkan crosshair ke lokasi sign sebelum tekan confirm.</p>
+            <div class="sign-action-group">
+                <button id="btn-sign-confirm" class="admin-btn" onclick="handleAddSign()">Confirm Sign</button>
+                <button id="btn-sign-cancel" class="admin-btn ghost" onclick="handleClearSignForm()">Cancel</button>
+            </div>
+        </div>
+
+        <div class="admin-panel-footer">
+            <button id="btn-delete-mode" class="admin-btn" onclick="toggleDeleteMode()">Delete Mode: OFF</button>
+            <a href="#" id="btn-reset" onclick="resetDatabase()">Reset to Default</a>
+        </div>
     </div>
     <div id="delete-popup">
         <p>Hapus Node ini?</p>
         <div class="popup-btn-group">
             <button class="popup-btn btn-confirm-del" onclick="executeDelete()">Delete</button>
             <button class="popup-btn btn-cancel-del" onclick="cancelDelete()">Cancel</button>
+        </div>
+    </div>
+    <div id="sign-image-overlay">
+        <div class="sign-image-modal">
+            <button class="sign-image-close" onclick="closeSignPopup()">X</button>
+            <img id="sign-popup-image" src="" alt="Sign preview">
+            <div class="sign-popup-copy">
+                <h3 id="sign-popup-title"></h3>
+                <p id="sign-popup-address"></p>
+                <p id="sign-popup-area"></p>
+            </div>
         </div>
     </div>
 

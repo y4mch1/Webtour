@@ -18,6 +18,18 @@ let hoveredPolygonId = null;
 let hoveredPolygonScene = null;
 let polygonScreenCache = {};
 const POLYGON_MIN_POINTS = 3;
+const SIGN_COLOR_DEFAULTS = {
+    title: '#1b263b',
+    address: '#ffffff',
+    area: '#ffffff'
+};
+let signOverlay = null;
+const signElements = {};
+let signPopupOverlay = null;
+let signPopupImageEl = null;
+let signPopupTitleEl = null;
+let signPopupAddressEl = null;
+let signPopupAreaEl = null;
 
 const defaultScenes = {
     "scene1": { "title": "test1", "type": "equirectangular", "panorama": "img/dji_fly_20260218_161340_18_1771409468615_pano_optimized.jpg", "hotSpots":[{ "id": "hs_1", "pitch": 0, "yaw": -45, "type": "info", "text": "Turun ke Bawah", "sceneId": "scene2", "createTooltipArgs": { label: "Scene2", icon: "drone" } }] },
@@ -31,6 +43,9 @@ Object.keys(defaultScenes).forEach(id => {
     if (!Array.isArray(defaultScenes[id].polygons)) {
         defaultScenes[id].polygons = [];
     }
+    if (!Array.isArray(defaultScenes[id].signs)) {
+        defaultScenes[id].signs = [];
+    }
 });
 
 function ensureSceneStructures() {
@@ -39,7 +54,18 @@ function ensureSceneStructures() {
         if (!scene) return;
         if (!Array.isArray(scene.hotSpots)) scene.hotSpots = [];
         if (!Array.isArray(scene.polygons)) scene.polygons = [];
+        if (!Array.isArray(scene.signs)) scene.signs = [];
+        scene.signs.forEach(sign => {
+            if (!sign.id) sign.id = generateSignId();
+            if (typeof sign.sceneId === 'undefined' || sign.sceneId === null) {
+                sign.sceneId = sceneId;
+            }
+        });
     });
+}
+
+function generateSignId() {
+    return 'sign_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 }
 
 async function initDatabase() {
@@ -92,6 +118,7 @@ function subscribeToRealtime() {
             scenesConfig = defaultScenes;
         }
         ensureSceneStructures();
+        clearAllSignElements();
         injectFunctions(); 
         
         if(viewer) {
@@ -133,6 +160,14 @@ function executeDelete() {
                 scenesConfig[pendingDeleteScene].polygons = scenesConfig[pendingDeleteScene].polygons.filter(poly => poly.id !== pendingDeleteId);
                 saveToDatabase();
                 showStatus('Polygon deleted');
+            }
+        } else if (pendingDeleteType === 'sign') {
+            const scene = scenesConfig[pendingDeleteScene];
+            if (scene && scene.signs) {
+                scene.signs = scene.signs.filter(sign => sign.id !== pendingDeleteId);
+                removeSignElement(pendingDeleteId);
+                saveToDatabase();
+                showStatus('Papan Sign deleted');
             }
         } else {
             viewer.removeHotSpot(pendingDeleteId, pendingDeleteScene);
@@ -191,6 +226,7 @@ function initPannellum() {
         "scenes": scenesConfig
     });
     ensurePolygonOverlay();
+    ensureSignOverlay();
     setupViewerPointerTracker();
     startPolygonRenderLoop();
     viewer.on('scenechange', () => {
@@ -214,10 +250,19 @@ function toggleMode() {
     if(mode === 'admin') updateSceneDropdown();
 }
 
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.admin-tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === `tab-${tab}`);
+    });
+}
+
 function toggleDeleteMode() {
     isDeleteMode = !isDeleteMode;
     updateDeleteBtnUI();
-    showStatus(isDeleteMode ? "Delete Mode Active: Click node/polygon to remove" : "Delete Mode Off");
+    showStatus(isDeleteMode ? "Delete Mode Active: Click node/polygon/sign to remove" : "Delete Mode Off");
     if (!isDeleteMode) closeDeletePopup(); 
 }
 
@@ -273,6 +318,84 @@ function confirmAddNode() {
     viewer.addHotSpot(newHS, currentScene);
     
     saveToDatabase();
+}
+
+function handleAddSign() {
+    if (!viewer) {
+        showStatus('Viewer belum siap');
+        return;
+    }
+    if (document.getElementById('viewMode').value !== 'admin') {
+        showStatus('Sign hanya bisa ditambah di Admin Mode');
+        return;
+    }
+    const form = getSignFormData();
+    if (!form.valid) {
+        showStatus(form.message);
+        return;
+    }
+    const sceneId = viewer.getScene();
+    ensureSceneStructures();
+    const scene = scenesConfig[sceneId];
+    if (!scene) return;
+    if (!Array.isArray(scene.signs)) scene.signs = [];
+    const newSign = {
+        id: generateSignId(),
+        pitch: viewer.getPitch(),
+        yaw: viewer.getYaw(),
+        title: form.title,
+        address: form.address,
+        landSize: form.area,
+        imageUrl: form.imageUrl,
+        colorTitle: form.colorTitle,
+        colorAddress: form.colorAddress,
+        colorArea: form.colorArea,
+        sceneId
+    };
+    scene.signs.push(newSign);
+    saveToDatabase();
+    showStatus('Papan Sign ditambahkan');
+    handleClearSignForm();
+}
+
+function handleClearSignForm() {
+    const titleInput = document.getElementById('signTitle');
+    const addressInput = document.getElementById('signAddress');
+    const areaInput = document.getElementById('signArea');
+    const imageInput = document.getElementById('signImageUrl');
+    if (titleInput) titleInput.value = '';
+    if (addressInput) addressInput.value = '';
+    if (areaInput) areaInput.value = '';
+    if (imageInput) imageInput.value = '';
+    const titleColor = document.getElementById('signTitleColor');
+    const addressColor = document.getElementById('signAddressColor');
+    const areaColor = document.getElementById('signAreaColor');
+    if (titleColor) titleColor.value = SIGN_COLOR_DEFAULTS.title;
+    if (addressColor) addressColor.value = SIGN_COLOR_DEFAULTS.address;
+    if (areaColor) areaColor.value = SIGN_COLOR_DEFAULTS.area;
+}
+
+function getSignFormData() {
+    const title = (document.getElementById('signTitle')?.value || '').trim();
+    const address = (document.getElementById('signAddress')?.value || '').trim();
+    const area = (document.getElementById('signArea')?.value || '').trim();
+    const imageUrl = (document.getElementById('signImageUrl')?.value || '').trim();
+    if (!title || !address || !area || !imageUrl) {
+        return { valid: false, message: 'Lengkapi Title, Alamat, Luas, dan Image URL' };
+    }
+    const colorTitle = document.getElementById('signTitleColor')?.value || SIGN_COLOR_DEFAULTS.title;
+    const colorAddress = document.getElementById('signAddressColor')?.value || SIGN_COLOR_DEFAULTS.address;
+    const colorArea = document.getElementById('signAreaColor')?.value || SIGN_COLOR_DEFAULTS.area;
+    return {
+        valid: true,
+        title,
+        address,
+        area,
+        imageUrl,
+        colorTitle,
+        colorAddress,
+        colorArea
+    };
 }
 
 async function resetDatabase() {
@@ -472,10 +595,18 @@ function ensurePolygonOverlay() {
     document.getElementById('panorama').appendChild(polygonOverlay);
 }
 
+function ensureSignOverlay() {
+    if (signOverlay || !document.getElementById('panorama')) return;
+    signOverlay = document.createElement('div');
+    signOverlay.setAttribute('id', 'sign-overlay');
+    document.getElementById('panorama').appendChild(signOverlay);
+}
+
 function startPolygonRenderLoop() {
     if (polygonRenderFrame) cancelAnimationFrame(polygonRenderFrame);
     const loop = () => {
         renderPolygons();
+        renderSigns();
         polygonRenderFrame = requestAnimationFrame(loop);
     };
     loop();
@@ -531,6 +662,163 @@ function renderPolygons() {
         }
     }
     polygonOverlay.replaceChildren(fragment);
+}
+
+function renderSigns() {
+    if (!viewer) return;
+    if (!signOverlay) ensureSignOverlay();
+    if (!signOverlay) return;
+    const sceneId = viewer.getScene();
+    const scene = scenesConfig[sceneId];
+    if (!scene) {
+        clearAllSignElements();
+        return;
+    }
+    const container = viewer.getContainer();
+    if (!container) return;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const viewerState = getViewerState();
+    if (!viewerState) return;
+    const activeIds = new Set();
+    (scene.signs || []).forEach(sign => {
+        if (!sign.id) sign.id = generateSignId();
+        if (typeof sign.sceneId === 'undefined' || sign.sceneId === null) sign.sceneId = sceneId;
+        if (typeof sign.pitch !== 'number' || typeof sign.yaw !== 'number') return;
+        const coords = projectToScreen(sign.pitch, sign.yaw, width, height, viewerState);
+        if (!coords || !coords.visible) {
+            const hiddenEl = signElements[sign.id];
+            if (hiddenEl) hiddenEl.style.display = 'none';
+            return;
+        }
+        let el = signElements[sign.id];
+        if (!el) {
+            el = buildSignElement(sign);
+        }
+        updateSignElement(el, sign, coords, sceneId);
+        activeIds.add(sign.id);
+    });
+    Object.keys(signElements).forEach(id => {
+        if (!activeIds.has(id)) {
+            removeSignElement(id);
+        }
+    });
+}
+
+function buildSignElement(sign) {
+    const card = document.createElement('div');
+    card.className = 'sign-card';
+    card.dataset.id = sign.id;
+    card.addEventListener('click', (event) => handleSignClick(event, sign.id));
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'sign-segment sign-title';
+    card.appendChild(titleEl);
+
+    const addressEl = document.createElement('div');
+    addressEl.className = 'sign-segment sign-address';
+    card.appendChild(addressEl);
+
+    const areaEl = document.createElement('div');
+    areaEl.className = 'sign-segment sign-area';
+    card.appendChild(areaEl);
+
+    signElements[sign.id] = card;
+    if (!signOverlay) ensureSignOverlay();
+    if (signOverlay) signOverlay.appendChild(card);
+    return card;
+}
+
+function updateSignElement(element, sign, coords, sceneId) {
+    if (!element) return;
+    element.style.left = `${coords.x}px`;
+    element.style.top = `${coords.y}px`;
+    element.style.display = 'block';
+    element.dataset.scene = sceneId;
+
+    const titleEl = element.querySelector('.sign-title');
+    const addressEl = element.querySelector('.sign-address');
+    const areaEl = element.querySelector('.sign-area');
+
+    if (titleEl) {
+        titleEl.textContent = sign.title || '-';
+        titleEl.style.backgroundColor = sign.colorTitle || SIGN_COLOR_DEFAULTS.title;
+        titleEl.style.color = '#fff';
+    }
+    if (addressEl) {
+        addressEl.textContent = sign.address || '-';
+        addressEl.style.backgroundColor = sign.colorAddress || SIGN_COLOR_DEFAULTS.address;
+    }
+    if (areaEl) {
+        areaEl.textContent = sign.landSize ? `Luas: ${sign.landSize}` : '-';
+        areaEl.style.backgroundColor = sign.colorArea || SIGN_COLOR_DEFAULTS.area;
+    }
+}
+
+function clearAllSignElements() {
+    Object.keys(signElements).forEach(id => {
+        removeSignElement(id);
+    });
+}
+
+function removeSignElement(signId) {
+    if (signElements[signId]) {
+        signElements[signId].remove();
+    }
+    delete signElements[signId];
+}
+
+function handleSignClick(event, signId) {
+    event.stopPropagation();
+    event.preventDefault();
+    const sceneId = viewer ? viewer.getScene() : null;
+    if (!sceneId) return;
+    const scene = scenesConfig[sceneId];
+    if (!scene || !Array.isArray(scene.signs)) return;
+    const sign = scene.signs.find(s => s.id === signId);
+    if (!sign) return;
+
+    if (document.getElementById('viewMode').value === 'admin' && isDeleteMode) {
+        pendingDeleteId = signId;
+        pendingDeleteScene = sceneId;
+        pendingDeleteType = 'sign';
+        document.getElementById('delete-popup').style.display = 'block';
+        return;
+    }
+
+    openSignPopup(sign);
+}
+
+function openSignPopup(sign) {
+    if (!signPopupOverlay) return;
+    if (signPopupImageEl) {
+        signPopupImageEl.src = sign.imageUrl || '';
+    }
+    if (signPopupTitleEl) signPopupTitleEl.innerText = sign.title || '';
+    if (signPopupAddressEl) signPopupAddressEl.innerText = sign.address || '';
+    if (signPopupAreaEl) signPopupAreaEl.innerText = sign.landSize ? `Luas Tanah: ${sign.landSize}` : '';
+    signPopupOverlay.style.display = 'flex';
+}
+
+function closeSignPopup() {
+    if (!signPopupOverlay) return;
+    signPopupOverlay.style.display = 'none';
+    if (signPopupImageEl) signPopupImageEl.src = '';
+}
+
+function cacheSignPopupElements() {
+    signPopupOverlay = document.getElementById('sign-image-overlay');
+    signPopupImageEl = document.getElementById('sign-popup-image');
+    signPopupTitleEl = document.getElementById('sign-popup-title');
+    signPopupAddressEl = document.getElementById('sign-popup-address');
+    signPopupAreaEl = document.getElementById('sign-popup-area');
+    if (signPopupOverlay) {
+        signPopupOverlay.addEventListener('click', (event) => {
+            if (event.target === signPopupOverlay) {
+                closeSignPopup();
+            }
+        });
+    }
 }
 
 function buildPathData(points, width, height, isPreview, viewerState) {
@@ -666,5 +954,7 @@ if (polygonColorInput) {
     });
 }
 updatePolygonButtons();
+
+cacheSignPopupElements();
 
 initDatabase();

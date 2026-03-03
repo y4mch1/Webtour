@@ -1,244 +1,240 @@
-body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-#panorama { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+#panorama {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
 
 #mode-container {
-    position: absolute; top: 20px; right: 20px; z-index: 1000;
-    background: rgba(255, 255, 255, 0.85); padding: 5px; border-radius: 8px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px);
+    position: absolute; top: 20px; left: 20px; z-index: 1000;
+    background: rgba(255, 255, 255, 0.9); padding: 5px 10px; border-radius: 6px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-#mode-container select { border: none; background: transparent; font-size: 12px; font-weight: 700; color: #333; outline: none; cursor: pointer; padding: 5px 10px; text-transform: uppercase; }
+#mode-container select { 
+    border: none; background: transparent; font-size: 13px; font-weight: 700; 
+    color: #333; outline: none; cursor: pointer; text-transform: uppercase; 
+}
 
 #admin-panel {
     position: absolute; bottom: 20px; right: 20px; z-index: 1000;
-    background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; width: 220px;
-    backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.98); 
+    padding: 20px; 
+    border-radius: 8px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+    display: none; 
+    width: 380px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    box-sizing: border-box; 
 }
-#admin-panel h4 { margin: 0 0 15px 0; font-size: 13px; color: #111; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-#admin-panel label { font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase; }
-#admin-panel select { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-size: 13px; outline: none; }
+
+#admin-panel h4 { 
+    margin: 0 0 15px 0; font-size: 14px; color: #111; letter-spacing: 1px; 
+    text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 10px; 
+}
+
+#admin-panel label { 
+    font-size: 10px; color: #666; font-weight: 700; text-transform: uppercase; 
+    display: block; margin-bottom: 4px;
+}
+
+.admin-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+.admin-tab {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 0;
+    background: #f9f9f9;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: center;
+}
+.admin-tab.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+.admin-tab-panel { display: none; }
+.admin-tab-panel.active { display: block; }
+.form-field { margin-bottom: 15px; }
 #admin-panel input[type="text"],
-#admin-panel input[type="url"] {
-    width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #ddd;
-    background: #fff; font-size: 12px; outline: none; color: #222;
-}
-#admin-panel input[type="color"] {
-    width: 100%; padding: 6px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #ddd;
-    background: #fff; height: 38px; cursor: pointer;
+#admin-panel input[type="url"],
+#admin-panel select {
+    width: 100%;
+    box-sizing: border-box; 
+    padding: 8px 10px;
+    margin: 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 13px;
+    height: 38px; 
+    outline: none;
 }
 
-.sign-editor { margin-top: 10px; padding-top: 12px; border-top: 1px solid #eee; }
-.sign-editor h5 { margin: 0 0 8px 0; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: #444; }
-.sign-color-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 10px; }
-.sign-color-grid label { font-size: 9px; margin-bottom: 4px; color: #777; }
-.sign-color-grid div { display: flex; flex-direction: column; }
-.sign-action-group { display: flex; gap: 8px; }
-.sign-action-group .admin-btn { flex: 1; }
-.admin-btn.ghost { background: transparent; border: 1px dashed #bbb; color: #666; }
+.sign-grid { display: flex; flex-direction: column; gap: 15px; }
 
-.polygon-action-group {
-    display: flex; gap: 8px; margin-bottom: 10px;
+.sign-row { 
+    display: flex; 
+    gap: 10px; 
+    align-items: flex-end; 
+    width: 100%;
 }
-.polygon-action-group .admin-btn { flex: 1; }
 
-.admin-btn { width: 100%; padding: 12px; margin-top: 8px; cursor: pointer; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; transition: all 0.2s; text-transform: uppercase; }
+.sign-row.single { flex-direction: column; align-items: stretch; }
+.sign-field { 
+    flex: 1; 
+    min-width: 0; 
+}
+.sign-field input { width: 100%; }
+
+.sign-color { 
+    flex: 0 0 80px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0; 
+}
+.sign-color label { margin-bottom: 4px; }
+
+#admin-panel input[type="color"],
+.sign-color input[type="color"] {
+    width: 100%; 
+    padding: 2px; 
+    margin: 0; 
+    border-radius: 4px; 
+    border: 1px solid #ccc;
+    background: #fff; 
+    height: 38px; 
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.admin-panel-footer { margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
+.sign-action-group { display: flex; flex-direction: column; gap: 8px; }
+
+.admin-btn { 
+    width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 4px; 
+    font-size: 12px; font-weight: 700; text-transform: uppercase; 
+}
 #btn-confirm { background: #007bff; color: white; }
-#btn-confirm:hover { background: #0056b3; transform: translateY(-1px); }
+#btn-confirm:hover { background: #0069d9; }
 
-#btn-delete-mode { background: #f8f9fa; color: #333; border: 1px solid #ddd; }
-#btn-delete-mode.active { background: #dc3545; color: white; border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
-#btn-polygon-mode.active { background: #28a745; color: #fff; border-color: #28a745; }
+#btn-reset { 
+    background: transparent; color: #999; margin-top: 10px; font-size: 10px; 
+    text-align: center; display: block; text-decoration: none;
+}
+#btn-reset:hover { color: #d9534f; }
 
-#btn-reset { background: transparent; color: #bbb; margin-top: 15px; font-size: 9px; text-decoration: none; text-align: center; display: block; }
-#btn-reset:hover { color: #dc3545; }
+.polygon-action-group { display: flex; gap: 10px; margin-bottom: 10px; }
+.polygon-action-group .admin-btn { flex: 1; }
+#btn-delete-mode { background: #f8f9fa; border: 1px solid #ddd; color: #333; }
+#btn-delete-mode.active { background: #dc3545; color: white; border-color: #dc3545; }
+#btn-polygon-mode.active { background: #28a745; color: #fff; }
 
 #crosshair {
     position: absolute; top: 50%; left: 50%; width: 4px; height: 4px;
     background: #fff; border: 1px solid #000; border-radius: 50%; 
     transform: translate(-50%, -50%); z-index: 10; pointer-events: none; display: none;
-    box-shadow: 0 0 0 8px rgba(255,255,255,0.2);
 }
 
 #minimap {
-    position: absolute; bottom: 20px; left: 20px; width: 240px; 
-    z-index: 20; background: #fff; border-radius: 12px; overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05);
+    position: absolute; bottom: 20px; left: 20px; width: 200px; 
+    z-index: 20; background: #fff; border-radius: 4px; overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 2px solid #fff;
 }
 #minimap img { width: 100%; display: block; }
 .map-node {
-    position: absolute; width: 10px; height: 10px; background-color: #41474e;
+    position: absolute; width: 10px; height: 10px; background-color: #444;
     border: 2px solid #fff; border-radius: 50%; cursor: pointer;
-    transform: translate(-50%, -50%); box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.2s;
+    transform: translate(-50%, -50%);
 }
-.map-node:hover { transform: translate(-50%, -50%) scale(1); background-color: #000; }
 
 .custom-hotspot {
-    width: 32px; height: 32px; background-color: #fff; border-radius: 50%; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2); cursor: pointer; transform: translate(-50%, -50%); 
-    background-position: center; background-repeat: no-repeat; background-size: 55%; 
-    border: 2px solid #fff; 
-}
-.custom-hotspot:hover { 
-    z-index: 1000; 
+    width: 30px; height: 30px; background-color: #fff; border-radius: 50%; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer; transform: translate(-50%, -50%); 
+    background-position: center; background-repeat: no-repeat; background-size: 60%; 
 }
 .icon-drone { background-image: url('img/drone.png'); }
 .icon-star { background-image: url('img/star.png'); }
 
 .custom-hotspot::after {
-    content: attr(data-text); position: absolute; bottom: 40px; left: 50%;
+    content: attr(data-text); position: absolute; bottom: 35px; left: 50%;
     transform: translateX(-50%); background: rgba(0, 0, 0, 0.8); color: white;
-    padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap;
-    opacity: 0; pointer-events: none; 
+    padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
 }
-.custom-hotspot:hover::after { 
-    opacity: 1; 
-}
+.custom-hotspot:hover::after { opacity: 1; }
 
 #status {
     position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-    color: white; background: rgba(0, 0, 0, 0.7); padding: 10px 20px; 
-    border-radius: 30px; display: none; z-index: 1001; font-size: 12px; font-weight: 500;
-    backdrop-filter: blur(5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    color: white; background: rgba(0, 0, 0, 0.7); padding: 8px 16px; 
+    border-radius: 20px; display: none; z-index: 1001; font-size: 12px;
 }
-
 #loading-screen {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: #000; color: #fff; display: flex; justify-content: center;
-    align-items: center; z-index: 9999; font-size: 18px; font-weight: bold;
+    align-items: center; z-index: 9999;
 }
 
 #delete-popup {
-    position: fixed; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%);
-    display: none; 
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px 30px; 
-    border-radius: 12px; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    z-index: 2000; 
-    backdrop-filter: blur(5px); 
-    border: 2px solid #dc3545;
-    text-align: center;
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    display: none; background: #fff; padding: 20px; border-radius: 8px; 
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5); z-index: 2000; text-align: center; border: 1px solid #ccc;
 }
-#delete-popup p { margin: 0 0 15px 0; font-size: 15px; font-weight: bold; color: #111; }
-.popup-btn-group { display: flex; gap: 10px; justify-content: center; }
-.popup-btn { border: none; padding: 8px 20px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.popup-btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+.popup-btn { padding: 6px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
 .btn-confirm-del { background: #dc3545; color: white; }
-.btn-confirm-del:hover { background: #c82333; }
-.btn-cancel-del { background: #e2e6ea; color: #333; }
-.btn-cancel-del:hover { background: #dae0e5; }
-.pnlm-load-box {
-    display: none !important;
-}
+.btn-cancel-del { background: #eee; color: #333; }
 
-#polygon-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 9;
+.pnlm-load-box { display: none !important; }
+#polygon-overlay, #sign-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 11;
 }
-#sign-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 11;
-}
-.polygon-path {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-    stroke-width: 2;
-    fill-opacity: 0.4;
-    stroke-opacity: 0.85;
-}
-.polygon-path.is-hovered {
-    opacity: 1;
-}
-.polygon-preview {
-    fill: none;
-    stroke: #fff;
-    stroke-width: 2;
-    stroke-dasharray: 5 4;
-    opacity: 0.9;
-    pointer-events: none;
-}
-
+.polygon-path { opacity: 0; stroke-width: 2; fill-opacity: 0.4; stroke-opacity: 0.8; pointer-events: none; }
+.polygon-path.is-hovered { opacity: 1; }
+.polygon-preview { fill: none; stroke: #fff; stroke-width: 2; stroke-dasharray: 5 4; opacity: 0.9; }
 .sign-card {
-    pointer-events: auto;
-    min-width: 150px;
-    max-width: 200px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #111;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    backdrop-filter: blur(2px);
-    transition: transform 0.2s ease;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
+    pointer-events: auto; min-width: 150px; max-width: 200px;
+    background: rgba(255,255,255,0.9); border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: absolute;
+    transform: translate(-50%, -50%); cursor: pointer; font-size: 11px;
+    border: 1px solid #ccc;
 }
-.sign-card:hover { transform: translate(-50%, -50%) scale(1.03); }
-.sign-card .sign-segment {
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-    color: #131313;
-    letter-spacing: 0.5px;
-}
-.sign-card .sign-title {
-    font-size: 12px;
-    color: #fff;
-}
-.sign-card .sign-address { font-size: 10px; text-transform: none; color: #222; }
-.sign-card .sign-area { font-size: 11px; }
+.sign-card:hover { transform: translate(-50%, -50%) scale(1.05); z-index: 999; }
+.sign-card .sign-segment { padding: 6px 10px; border-bottom: 1px solid #eee; color: #333; }
+.sign-card .sign-title { font-weight: bold; background: #333; color: #fff; border: none; }
+.sign-card .sign-address { font-size: 10px; color: #555; }
+.sign-card .sign-area { background: #ffcc00; font-weight: bold; border: none; }
 
 #sign-image-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.75);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 3000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); display: none;
+    align-items: center; justify-content: center; z-index: 3000;
 }
 .sign-image-modal {
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.45);
-    position: relative;
-    text-align: center;
+    background: #fff; border-radius: 8px; padding: 15px;
+    max-width: 400px; width: 90%; position: relative; text-align: center;
 }
 .sign-image-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    border: none;
-    background: transparent;
-    font-size: 22px;
-    cursor: pointer;
-    color: #555;
+    position: absolute; top: 5px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer;
 }
-.sign-image-modal img {
-    max-width: 100%;
-    border-radius: 12px;
-    margin-bottom: 12px;
+.sign-image-modal img { max-width: 100%; border-radius: 4px; margin-bottom: 10px; }
+@media (max-width: 600px) {
+    #admin-panel { width: 90vw; bottom: 10px; right: 5vw; }
+    .sign-row { flex-direction: column; align-items: stretch; }
+    .sign-color { flex: auto; width: 100%; }
 }
-.sign-popup-copy h3 { margin: 0 0 8px 0; font-size: 18px; color: #111; }
-.sign-popup-copy p { margin: 4px 0; font-size: 13px; color: #444; }
