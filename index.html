@@ -30,6 +30,13 @@
             <option value="star">Star</option>
         </select>
         <button id="btn-confirm" class="admin-btn" onclick="confirmAddNode()">Add Node</button>
+        <label>Polygon Color</label>
+        <input type="color" id="polygonColor" value="#ff4d4d">
+        <button id="btn-polygon-mode" class="admin-btn" onclick="togglePolygonMode()">Polygon Mode: OFF</button>
+        <div class="polygon-action-group">
+            <button id="btn-polygon-save" class="admin-btn" onclick="savePolygonDraft()" disabled>Save Polygon</button>
+            <button id="btn-polygon-cancel" class="admin-btn" onclick="cancelPolygonDraft()" disabled>Cancel</button>
+        </div>
         <button id="btn-delete-mode" class="admin-btn" onclick="toggleDeleteMode()">Delete Mode: OFF</button>
         <a href="#" id="btn-reset" onclick="resetDatabase()">Reset to Default</a>
     </div>

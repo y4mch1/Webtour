@@ -1,5 +1,5 @@
 body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-#panorama { width: 100%; height: 100vh; }
+#panorama { width: 100%; height: 100vh; position: relative; overflow: hidden; }
 
 #mode-container {
     position: absolute; top: 20px; right: 20px; z-index: 1000;
@@ -17,6 +17,29 @@ body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: 
 #admin-panel h4 { margin: 0 0 15px 0; font-size: 13px; color: #111; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 10px; }
 #admin-panel label { font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase; }
 #admin-panel select { width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-size: 13px; outline: none; }
+#admin-panel input[type="text"],
+#admin-panel input[type="url"] {
+    width: 100%; padding: 10px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #ddd;
+    background: #fff; font-size: 12px; outline: none; color: #222;
+}
+#admin-panel input[type="color"] {
+    width: 100%; padding: 6px; margin: 8px 0 15px 0; border-radius: 6px; border: 1px solid #ddd;
+    background: #fff; height: 38px; cursor: pointer;
+}
+
+.sign-editor { margin-top: 10px; padding-top: 12px; border-top: 1px solid #eee; }
+.sign-editor h5 { margin: 0 0 8px 0; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: #444; }
+.sign-color-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 10px; }
+.sign-color-grid label { font-size: 9px; margin-bottom: 4px; color: #777; }
+.sign-color-grid div { display: flex; flex-direction: column; }
+.sign-action-group { display: flex; gap: 8px; }
+.sign-action-group .admin-btn { flex: 1; }
+.admin-btn.ghost { background: transparent; border: 1px dashed #bbb; color: #666; }
+
+.polygon-action-group {
+    display: flex; gap: 8px; margin-bottom: 10px;
+}
+.polygon-action-group .admin-btn { flex: 1; }
 
 .admin-btn { width: 100%; padding: 12px; margin-top: 8px; cursor: pointer; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; transition: all 0.2s; text-transform: uppercase; }
 #btn-confirm { background: #007bff; color: white; }
@@ -24,6 +47,7 @@ body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: 
 
 #btn-delete-mode { background: #f8f9fa; color: #333; border: 1px solid #ddd; }
 #btn-delete-mode.active { background: #dc3545; color: white; border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
+#btn-polygon-mode.active { background: #28a745; color: #fff; border-color: #28a745; }
 
 #btn-reset { background: transparent; color: #bbb; margin-top: 15px; font-size: 9px; text-decoration: none; text-align: center; display: block; }
 #btn-reset:hover { color: #dc3545; }
@@ -108,3 +132,113 @@ body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: 
 .pnlm-load-box {
     display: none !important;
 }
+
+#polygon-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9;
+}
+#sign-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 11;
+}
+.polygon-path {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    stroke-width: 2;
+    fill-opacity: 0.4;
+    stroke-opacity: 0.85;
+}
+.polygon-path.is-hovered {
+    opacity: 1;
+}
+.polygon-preview {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.sign-card {
+    pointer-events: auto;
+    min-width: 150px;
+    max-width: 200px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #111;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    backdrop-filter: blur(2px);
+    transition: transform 0.2s ease;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
+.sign-card:hover { transform: translate(-50%, -50%) scale(1.03); }
+.sign-card .sign-segment {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    color: #131313;
+    letter-spacing: 0.5px;
+}
+.sign-card .sign-title {
+    font-size: 12px;
+    color: #fff;
+}
+.sign-card .sign-address { font-size: 10px; text-transform: none; color: #222; }
+.sign-card .sign-area { font-size: 11px; }
+
+#sign-image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 3000;
+}
+.sign-image-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+    position: relative;
+    text-align: center;
+}
+.sign-image-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    cursor: pointer;
+    color: #555;
+}
+.sign-image-modal img {
+    max-width: 100%;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+.sign-popup-copy h3 { margin: 0 0 8px 0; font-size: 18px; color: #111; }
+.sign-popup-copy p { margin: 4px 0; font-size: 13px; color: #444; }
