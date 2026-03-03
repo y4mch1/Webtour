@@ -3,34 +3,56 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Tour</title>
+    <title>WebTour</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <div id="loading-screen">Menghubungkan ke Database</div>
+
+    <div id="mode-container">
+        <select id="viewMode" onchange="toggleMode()">
+            <option value="user">User Mode</option>
+            <option value="admin">Admin Mode</option>
+        </select>
+    </div>
+
+    <div id="admin-panel">
+        <h4>Scene Editor</h4>     
+        <label>Target Scene</label>
+        <select id="targetSceneSelect"></select>
+        <label>Icon Node</label>
+        <select id="iconSelect">
+            <option value="drone">Drone</option>
+            <option value="star">Star</option>
+        </select>
+        <button id="btn-confirm" class="admin-btn" onclick="confirmAddNode()">Add Node</button>
+        <button id="btn-delete-mode" class="admin-btn" onclick="toggleDeleteMode()">Delete Mode: OFF</button>
+        <a href="#" id="btn-reset" onclick="resetDatabase()">Reset to Default</a>
+    </div>
+    <div id="delete-popup">
+        <p>Hapus Node ini?</p>
+        <div class="popup-btn-group">
+            <button class="popup-btn btn-confirm-del" onclick="executeDelete()">Delete</button>
+            <button class="popup-btn btn-cancel-del" onclick="cancelDelete()">Cancel</button>
+        </div>
+    </div>
+
     <div id="crosshair"></div>
-    <div id="status">Berjalan...</div>
+    <div id="status"></div>
+
     <div id="minimap">
-        <img src="img/map.jpeg" alt="Peta Lokasi">
-        
-        <!-- Node Peta (Koordinat dalam %) -->
-        <div class="map-node" style="top: 76%; left: 2%;" 
-             title="Scene 1" onclick="viewer.loadScene('scene1')"></div>
-
-        <div class="map-node" style="top: 25%; left: 8%;" 
-             title="Scene 2" onclick="viewer.loadScene('scene2')"></div>
-
-        <div class="map-node" style="top: 20%; left: 78%;" 
-             title="Scene 3" onclick="viewer.loadScene('scene3')"></div>
-             
-        <div class="map-node" style="top: 90%; left: 90%;" 
-             title="Scene 4" onclick="viewer.loadScene('scene4')"></div>
+        <img src="img/map.jpeg" alt="Map">
+        <div class="map-node" style="top: 76%; left: 2%;" title="Scene 1" onclick="viewer.loadScene('scene1')"></div>
+        <div class="map-node" style="top: 25%; left: 8%;" title="Scene 2" onclick="viewer.loadScene('scene2')"></div>
+        <div class="map-node" style="top: 20%; left: 78%;" title="Scene 3" onclick="viewer.loadScene('scene3')"></div>
+        <div class="map-node" style="top: 90%; left: 90%;" title="Scene 4" onclick="viewer.loadScene('scene4')"></div>
     </div>
 
     <div id="panorama"></div>
     <script src="script.js"></script>
-
 </body>
 </html>
